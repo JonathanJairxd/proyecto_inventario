@@ -1,0 +1,106 @@
+<!-- app/public/inventario.html -->
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Inventario Papelería</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-light">
+  <div class="container my-5">
+    <h2 class="text-center mb-4">Gestión de Productos - Papelería</h2>
+
+    <div class="card p-4 mb-4 shadow">
+      <h4>Registrar nuevo producto</h4>
+      <div class="row g-2">
+        <div class="col-md-4">
+          <input id="codigo" class="form-control" placeholder="Código (único)">
+        </div>
+        <div class="col-md-4">
+          <input id="nombre" class="form-control" placeholder="Nombre del producto">
+        </div>
+        <div class="col-md-4">
+          <input id="unidad" class="form-control" placeholder="Unidad (ej. unidad, caja)">
+        </div>
+        <div class="col-md-6 mt-2">
+          <input id="descripcion" class="form-control" placeholder="Descripción">
+        </div>
+        <div class="col-md-6 mt-2">
+          <input id="categoria" class="form-control" placeholder="Categoría (ej. Escritura, Carpetas)">
+        </div>
+        <div class="col-12 mt-3">
+          <button onclick="agregarProducto()" class="btn btn-success w-100">Guardar producto</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card p-4 shadow">
+      <h4>Lista de productos registrados</h4>
+      <table class="table table-bordered mt-3">
+        <thead class="table-primary">
+          <tr>
+            <th>Código</th>
+            <th>Nombre</th>
+            <th>Descripción</th>
+            <th>Unidad</th>
+            <th>Categoría</th>
+          </tr>
+        </thead>
+        <tbody id="tabla-productos"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    function agregarProducto() {
+      const datos = {
+        codigo: document.getElementById('codigo').value,
+        nombre: document.getElementById('nombre').value,
+        descripcion: document.getElementById('descripcion').value,
+        unidad: document.getElementById('unidad').value,
+        categoria: document.getElementById('categoria').value
+      };
+
+      fetch('/api/productos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(datos)
+      })
+        .then(res => res.json())
+        .then(data => {
+          const mensaje = data.instancia
+            ? `${data.message} (Respondido por: ${data.instancia})`
+            : data.message;
+
+          alert(mensaje);
+          mostrarProductos();
+        });
+    }
+
+    function mostrarProductos() {
+      fetch('/api/productos')
+        .then(res => res.json())
+        .then(data => {
+          const tabla = document.getElementById('tabla-productos');
+          tabla.innerHTML = '';
+          data.forEach(p => {
+            tabla.innerHTML += `
+              <tr>
+                <td>${p.codigo}</td>
+                <td>${p.nombre}</td>
+                <td>${p.descripcion}</td>
+                <td>${p.unidad}</td>
+                <td>${p.categoria}</td>
+              </tr>`;
+          });
+        });
+    }
+
+    // Cargar productos al inicio
+    mostrarProductos();
+  </script>
+</body>
+
+</html>
